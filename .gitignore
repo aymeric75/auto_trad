@@ -1,0 +1,14 @@
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+**/my_dir*/
+
+
+# Files
+*.pkl
+*.npz
+*.h5
