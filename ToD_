@@ -1,7 +1,4 @@
-
-
-
-
-immediate: terminer check format fichier loopé dans datasets.py
+immediate: fct qui retourne, parmis un ensemble de fichiers uniques (ceux dans data/no_labels),
+toutes les combinaisons possible (sans dupplicat), de N fichiers (N est donné en entrée)
 
 general: fcts that from .txt files, do the combinations of datas
