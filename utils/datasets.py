@@ -1,14 +1,80 @@
 
 
-#  Une fois que tu as une liste de array où chaque array represent un type 
-#
-#
-#   TU VAS 
-
 
 import numpy as np
 
+from itertools import combinations
 
+
+
+valid_tf_list = ["1m", "5m", "15m", "1h", "4h"]
+
+
+def check_filename_valid(filename):
+
+
+    # check if txt file
+    if filename.endswith('.txt'):
+
+        # check if file is in good format (must have 5 "features")
+        list_features = filename[:-4].split("__")
+        if len(list_features) == 5:
+
+            # check dates format
+            dates_arr = list_features[1].split("_")
+            if len(dates_arr) == 2:
+                if not re.fullmatch(r'^\d{6}$', dates_arr[0]) and re.fullmatch(r'^\d{6}$', dates_arr[1]):
+                    return False
+            else:
+                return False
+            # check hours format
+            hours_arr = list_features[2].split("_")
+            if len(hours_arr) == 2:
+                if not re.fullmatch(r'^\d{4}$', hours_arr[0]) and re.fullmatch(r'^\d{4}$', hours_arr[1]):
+                    return False
+
+            else:
+                return False
+
+
+            # check currency format
+            curr_ = list_features[3]
+
+            # check tframe format
+            tframe = list_features[4]
+
+            if tframe not in valid_tf_list:
+                return False
+            
+        else:
+            return False
+    else:
+        return False
+
+    return True
+
+
+# filename must include ".txt" extension !!
+def check_filename_complies(filename, from_date, to_date, from_h, to_h, curr, tframe):
+
+    list_features = filename[:-4].split("__")
+
+    dates_arr = list_features[1].split("_")
+
+    hours_arr = list_features[2].split("_")
+
+    curr_ = list_features[3]
+
+    tframe_ = list_features[4]
+
+
+    if from_date == dates_arr[0] and to_date == dates_arr[1] and \
+        from_h == hours_arr[0] and to_h == hours_arr[1] and \
+        curr == curr_ and tframe == tframe_:
+
+        return True
+    
+    return False
 
 
 # *_date is ddmmyy
@@ -50,69 +116,19 @@ def return_train_from_liste(types_list, from_date, to_date, from_h, to_h, curr, 
         ##################################
         # different checks on files names
         ##################################
-        valid_file = True
-
-        # check if txt file
-        if filename.endswith('.txt'):
-
-            # check if file is in good format (must have 5 "features")
-            list_features = filename[:-4].split("__")
-            if len(list_features) == 5:
-
-                # check dates format
-                dates_arr = list_features[1].split("_")
-                if len(dates_arr) == 2:
-                    if not re.fullmatch(r'^\d{6}$', dates_arr[0]) and re.fullmatch(r'^\d{6}$', dates_arr[1]):
-                        valid_file  = False
-                        #print("dates not in the good format")
-                        continue
-                else:
-                    valid_file  = False
-                    #print("not good number of dates")
-                    continue
-
-                # check hours format
-                hours_arr = list_features[2].split("_")
-                if len(hours_arr) == 2:
-                    if not re.fullmatch(r'^\d{4}$', hours_arr[0]) and re.fullmatch(r'^\d{4}$', hours_arr[1]):
-                        valid_file  = False
-                        #print("hours not in the good format")
-                        continue
-                else:
-                    valid_file  = False
-                    #print("not good number of hours")
-                    continue
-
-                # check currency format
-                curr_ = list_features[3]
-
-                # check tframe format
-                tframe = list_features[4]
-
-                if tframe not in ["1m", "5m", "15m", "1h", "4h"]:
-                    valid_file  = False
-                    #print("timeframe not in the good format")
-                    continue
+       
+        if check_filename_valid(filename):
                 
+            if check_filename_complies(filename):
+                print("filename is valid")
+                data = np.loadtxt(os.getcwd()+"/data/no_labels/"+filename)
+                #print(data.shape)
+                retour_list.append(data)
+                retour_list_names.append(filename[:-4])
             else:
-                valid_file = False
-                print("not good number of features in filename")
-                continue
-        else:
-            valid_file = False
-            print("not a txt file")
-            continue
+                print("filename is NOT valid")
 
-        if valid_file:
-            print("filename is valid")
-            data = np.loadtxt(os.getcwd()+"/data/no_labels/"+filename)
-            #print(data.shape)
-            retour_list.append(data)
-            retour_list_names.append(filename[:-4])
-        else:
-            print("filename is NOT valid")
 
-    #print(retour_list)
 
     return retour_list, retour_list_names
 
@@ -140,9 +156,15 @@ def from_list_of_datas_and_names_save_train_data(list_of_datas, corresponding_na
     np.savez(thename+'.npz', data=data)
     return
 
-datas, names = return_train_from_liste("types_list", "from_date", "to_date", "from_h", "to_h", "curr", "tframe")
 
-print(len(datas))
-print(names)
 
-from_list_of_datas_and_names_save_train_data(datas, names)
+
+def return_all_files_combinations_from_list(files_list, N):
+    combinations_of_files = list(combinations(files_list, N))
+    return combinations_of_files
+
+
+# ha__100224_100324__0800_1200__runeusdtp__5m.txt
+print(check_filename_complies("ha__100224_100324__0800_1200__runeusdtp__5m.txt", "100224", "100324", "0800", "1200", "runeusdtp", "5m"))
+
+

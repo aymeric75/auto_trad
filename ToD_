@@ -1,4 +1,4 @@
-immediate: fct qui retourne, parmis un ensemble de fichiers uniques (ceux dans data/no_labels),
-toutes les combinaisons possible (sans dupplicat), de N fichiers (N est donné en entrée)
+immediate: fichier py "test" qui, à partir de critères, crée (pas les .npz, ne sauve pas)
+une liste où chaque élément est: 2 numpy arrays (un train, un test)
 
 general: fcts that from .txt files, do the combinations of datas
