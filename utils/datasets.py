@@ -1,16 +1,24 @@
-
-
-
 import numpy as np
-
+import os
 from itertools import combinations
+import re
 
-
+### DIFFERENCIE BIEN WITH et NO
 
 valid_tf_list = ["1m", "5m", "15m", "1h", "4h"]
 
 
 def check_filename_valid(filename):
+
+
+    if not (filename.split("__")[0] == "no" or filename.split("__")[0] == "with"):
+        print("file name must start with 'with' or 'no' ")
+        return
+
+    if filename.split("__")[0] == "no":
+        filename = filename[4:]
+    else:
+        filename = filename[6:]
 
 
     # check if txt file
@@ -57,6 +65,15 @@ def check_filename_valid(filename):
 # filename must include ".txt" extension !!
 def check_filename_complies(filename, from_date, to_date, from_h, to_h, curr, tframe):
 
+    if not (filename.split("__")[0] == "no" or filename.split("__")[0] == "with"):
+        print("file name must start with 'with' or 'no' ")
+        return
+
+    if filename.split("__")[0] == "no":
+        filename = filename[4:]
+    else:
+        filename = filename[6:]
+
     list_features = filename[:-4].split("__")
 
     dates_arr = list_features[1].split("_")
@@ -67,7 +84,6 @@ def check_filename_complies(filename, from_date, to_date, from_h, to_h, curr, tf
 
     tframe_ = list_features[4]
 
-
     if from_date == dates_arr[0] and to_date == dates_arr[1] and \
         from_h == hours_arr[0] and to_h == hours_arr[1] and \
         curr == curr_ and tframe == tframe_:
@@ -77,23 +93,17 @@ def check_filename_complies(filename, from_date, to_date, from_h, to_h, curr, tf
     return False
 
 
-# *_date is ddmmyy
-# *_h is hhmm
-# curr is only letters
-# tframe is e.g. 5m , 2h, 1D
-#
+#  from thedire 
 #  returns a list of arrays
-#  where each array represent a type of data in the
+#  where each array represents a type of data in the
 #  given curr, dates etc.
 
-def return_train_from_liste(types_list, from_date, to_date, from_h, to_h, curr, tframe):
+def return_train_from_liste(thedire, from_date, to_date, from_h, to_h, curr, tframe):
 
     # go in data/no_labels
     # and retrieve all txt files named from the types_list AND that complies with the 
     # other arguments (given as constraints)
     
-    types_list =  ["ha"]
-
     # "ha__100224_100324__0800_1200__runeusdtp__5m"
 
     retour_list = []
@@ -109,7 +119,7 @@ def return_train_from_liste(types_list, from_date, to_date, from_h, to_h, curr, 
     print(os.getcwd())
  
     # Loop over the txt files
-    for filename in os.listdir(os.getcwd()+"/data/no_labels"):
+    for filename in os.listdir(thedire):
         
         #print("current file is {}".format(filename))
 
@@ -119,9 +129,9 @@ def return_train_from_liste(types_list, from_date, to_date, from_h, to_h, curr, 
        
         if check_filename_valid(filename):
                 
-            if check_filename_complies(filename):
+            if check_filename_complies(filename, from_date, to_date, from_h, to_h, curr, tframe):
                 print("filename is valid")
-                data = np.loadtxt(os.getcwd()+"/data/no_labels/"+filename)
+                data = np.loadtxt(thedire+"/"+filename)
                 #print(data.shape)
                 retour_list.append(data)
                 retour_list_names.append(filename[:-4])
@@ -133,8 +143,9 @@ def return_train_from_liste(types_list, from_date, to_date, from_h, to_h, curr, 
     return retour_list, retour_list_names
 
 
+
 # entry: two numpy arrays of shape (n_samples, nb_features)
-def from_list_of_datas_and_names_save_train_data(list_of_datas, corresponding_names):
+def from_list_of_datas_and_names_return_in_good_format(list_of_datas, corresponding_names):
 
     print(corresponding_names)
 
@@ -153,9 +164,8 @@ def from_list_of_datas_and_names_save_train_data(list_of_datas, corresponding_na
     # print("qssssssss")
     # print(data.shape) # (975, 25, 3)
 
-    np.savez(thename+'.npz', data=data)
-    return
-
+    #np.savez(thename+'.npz', data=data)
+    return data
 
 
 
@@ -164,7 +174,43 @@ def return_all_files_combinations_from_list(files_list, N):
     return combinations_of_files
 
 
+def from_criteria_return_list_of_train_test(from_date, to_date, from_h, to_h, curr, tframe):
+
+    #
+    list_datas_trains, list_names_trains = return_train_from_liste(os.getcwd()+"/data/no_labels", 
+        from_date, 
+        to_date, 
+        from_h, 
+        to_h, 
+        curr, 
+        tframe
+        )
+
+    list_datas_tests, list_names_tests = return_train_from_liste(os.getcwd()+"/data/with_labels", 
+        from_date, 
+        to_date, 
+        from_h, 
+        to_h, 
+        curr, 
+        tframe
+        )
+
+
+    # 
+    files_combi_trains = return_all_files_combinations_from_list(list_names_trains, 2)
+    
+    print(files_combi_trains)
+
+    files_combi_tests = return_all_files_combinations_from_list(list_names_tests, 2)
+
+    return
+
+
+from_criteria_return_list_of_train_test("100224", "100324", "0800", "1200", "runeusdtp", "5m")
+
 # ha__100224_100324__0800_1200__runeusdtp__5m.txt
-print(check_filename_complies("ha__100224_100324__0800_1200__runeusdtp__5m.txt", "100224", "100324", "0800", "1200", "runeusdtp", "5m"))
+#print(check_filename_complies("ha__100224_100324__0800_1200__runeusdtp__5m.txt", "100224", "100324", "0800", "1200", "runeusdtp", "5m"))
 
 
+
+# return_train_from_liste(os.getcwd()+"/data/no_labels", types_list, from_date, to_date, from_h, to_h, curr, tframe)

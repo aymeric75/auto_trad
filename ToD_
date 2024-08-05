@@ -1,4 +1,7 @@
-immediate: fichier py "test" qui, à partir de critères, crée (pas les .npz, ne sauve pas)
-une liste où chaque élément est: 2 numpy arrays (un train, un test)
+immediate: dans datasets.py depuis l'output de  return_all_files_combinations_from_list
+et  return_train_from_liste  (les deux output des filename),
+
+construit la liste de trains et de tests 
+
 
 general: fcts that from .txt files, do the combinations of datas
