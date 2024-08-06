@@ -1,7 +1,8 @@
-immediate: dans datasets.py depuis l'output de  return_all_files_combinations_from_list
-et  return_train_from_liste  (les deux output des filename),
+immediate: dans datasets.py, fin, for each combi, find a name for the combi and
 
-construit la liste de trains et de tests 
+    attach là au truc que tu ajoute à list_of_train_test_combis
 
+    (en gros, tu veux un dico à la fin, où chaque cles décrit une combi, et où la valu
+    contient les 2 train et tests)
 
 general: fcts that from .txt files, do the combinations of datas

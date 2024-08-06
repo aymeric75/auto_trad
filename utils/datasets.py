@@ -98,7 +98,7 @@ def check_filename_complies(filename, from_date, to_date, from_h, to_h, curr, tf
 #  where each array represents a type of data in the
 #  given curr, dates etc.
 
-def return_train_from_liste(thedire, from_date, to_date, from_h, to_h, curr, tframe):
+def return_dico_from_criteria(thedire, from_date, to_date, from_h, to_h, curr, tframe):
 
     # go in data/no_labels
     # and retrieve all txt files named from the types_list AND that complies with the 
@@ -106,7 +106,6 @@ def return_train_from_liste(thedire, from_date, to_date, from_h, to_h, curr, tfr
     
     # "ha__100224_100324__0800_1200__runeusdtp__5m"
 
-    retour_list = []
 
     retour_list_names = []
 
@@ -116,8 +115,9 @@ def return_train_from_liste(thedire, from_date, to_date, from_h, to_h, curr, tfr
     import os
     import re
 
-    print(os.getcwd())
  
+    dico = {}
+
     # Loop over the txt files
     for filename in os.listdir(thedire):
         
@@ -133,36 +133,24 @@ def return_train_from_liste(thedire, from_date, to_date, from_h, to_h, curr, tfr
                 print("filename is valid")
                 data = np.loadtxt(thedire+"/"+filename)
                 #print(data.shape)
-                retour_list.append(data)
-                retour_list_names.append(filename[:-4])
+
+                dico[filename[:-4]] = data
             else:
                 print("filename is NOT valid")
 
 
 
-    return retour_list, retour_list_names
+    return dico
 
 
 
 # entry: two numpy arrays of shape (n_samples, nb_features)
-def from_list_of_datas_and_names_return_in_good_format(list_of_datas, corresponding_names):
+def from_list_of_datas_and_names_return_in_good_format(list_of_datas):
 
-    print(corresponding_names)
 
     n_samples, n_timesteps = list_of_datas[0].shape
 
     data = np.stack(tuple(list_of_datas), axis=-1) 
-
-    thename=""
-    therest = ""
-    for i, name in enumerate(corresponding_names):
-        if i == 0:
-            therest = "__".join(tuple(name.split("__")[1:]))
-        thename += name.split("__")[0] + "-"
-
-    thename = thename[:-1] + "__" + therest
-    # print("qssssssss")
-    # print(data.shape) # (975, 25, 3)
 
     #np.savez(thename+'.npz', data=data)
     return data
@@ -174,43 +162,67 @@ def return_all_files_combinations_from_list(files_list, N):
     return combinations_of_files
 
 
-def from_criteria_return_list_of_train_test(from_date, to_date, from_h, to_h, curr, tframe):
+def from_criteria_return_list_of_train_test(dico_trains, dico_tests):
 
-    #
-    list_datas_trains, list_names_trains = return_train_from_liste(os.getcwd()+"/data/no_labels", 
-        from_date, 
-        to_date, 
-        from_h, 
-        to_h, 
-        curr, 
-        tframe
-        )
-
-    list_datas_tests, list_names_tests = return_train_from_liste(os.getcwd()+"/data/with_labels", 
-        from_date, 
-        to_date, 
-        from_h, 
-        to_h, 
-        curr, 
-        tframe
-        )
 
 
     # 
-    files_combi_trains = return_all_files_combinations_from_list(list_names_trains, 2)
+    files_combi_trains = return_all_files_combinations_from_list(list(dico_trains.keys()), 2)
     
-    print(files_combi_trains)
+    files_combi_tests = return_all_files_combinations_from_list(list(dico_tests.keys()), 2)
 
-    files_combi_tests = return_all_files_combinations_from_list(list_names_tests, 2)
-
-    return
-
-
-from_criteria_return_list_of_train_test("100224", "100324", "0800", "1200", "runeusdtp", "5m")
-
-# ha__100224_100324__0800_1200__runeusdtp__5m.txt
-#print(check_filename_complies("ha__100224_100324__0800_1200__runeusdtp__5m.txt", "100224", "100324", "0800", "1200", "runeusdtp", "5m"))
+    return files_combi_trains, files_combi_tests
 
 
 
-# return_train_from_liste(os.getcwd()+"/data/no_labels", types_list, from_date, to_date, from_h, to_h, curr, tframe)
+
+# useful data
+dico_trains = return_dico_from_criteria(os.getcwd()+"/data/no_labels","100224", "100324", "0800", "1200", "runeusdtp", "5m")
+
+dico_tests = return_dico_from_criteria(os.getcwd()+"/data/with_labels","100224", "100324", "0800", "1200", "runeusdtp", "5m")
+
+# 1) return 2 lists: one of the train files, one of the <=> test files
+files_combi_trains, files_combi_tests = from_criteria_return_list_of_train_test(dico_trains, dico_tests)
+
+
+list_of_train_test_combis = []
+
+## 3) for each combination for "style" in files_combi_trains
+for combi in files_combi_trains:
+
+    # print("TTTT")
+    # print(len(combi))
+
+    all_corres_tests = True
+    for iii in range(len(combi)):
+        if "with__"+combi[iii][4:] not in list(dico_tests.keys()):
+            all_corres_tests = False
+
+    train_files = []
+    test_files = []
+
+    # all_corres_tests
+    for iii in range(len(combi)):
+        # TYPE iii of the combi
+        train_files.append(dico_trains[combi[iii]])
+        test_files.append(dico_tests["with__"+combi[iii][4:]])
+
+
+    data_train = from_list_of_datas_and_names_return_in_good_format(train_files)
+
+    data_test = from_list_of_datas_and_names_return_in_good_format(test_files)
+
+    list_of_train_test_combis.append(
+        {
+            "train" : data_train,
+            "test" : data_test
+        }
+    )
+
+    print(list_of_train_test_combis)
+
+
+
+
+
+# return_dico_from_criteria(os.getcwd()+"/data/no_labels", types_list, from_date, to_date, from_h, to_h, curr, tframe)
