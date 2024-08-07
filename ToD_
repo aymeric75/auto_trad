@@ -1,8 +1,5 @@
-immediate: dans datasets.py, fin, for each combi, find a name for the combi and
+immediate: faire une fonction dans datasets.py qu'on importe ensuite dans timeVAE/src/vae_search.py
 
-    attach là au truc que tu ajoute à list_of_train_test_combis
 
-    (en gros, tu veux un dico à la fin, où chaque cles décrit une combi, et où la valu
-    contient les 2 train et tests)
 
 general: fcts that from .txt files, do the combinations of datas
