@@ -226,7 +226,6 @@ for combi in files_combi_trains:
     }
     
 
-print("SALUT SALUT")
 print(dico_of_train_test_combis)
 
 
