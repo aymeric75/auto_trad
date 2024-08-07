@@ -185,13 +185,21 @@ dico_tests = return_dico_from_criteria(os.getcwd()+"/data/with_labels","100224",
 files_combi_trains, files_combi_tests = from_criteria_return_list_of_train_test(dico_trains, dico_tests)
 
 
-list_of_train_test_combis = []
+dico_of_train_test_combis = {}
 
 ## 3) for each combination for "style" in files_combi_trains
 for combi in files_combi_trains:
 
-    # print("TTTT")
-    # print(len(combi))
+
+
+    # making the name for the combi
+    name_combi = ""
+    styles = []
+    for iii in range(len(combi)):
+        styles.append(combi[iii].split("__")[1])
+    name_combi += "__".join(combi[0].split("__")[2:])
+    name_combi = "__".join(styles) + "__" + name_combi
+
 
     all_corres_tests = True
     for iii in range(len(combi)):
@@ -212,16 +220,14 @@ for combi in files_combi_trains:
 
     data_test = from_list_of_datas_and_names_return_in_good_format(test_files)
 
-    list_of_train_test_combis.append(
-        {
-            "train" : data_train,
-            "test" : data_test
-        }
-    )
+    dico_of_train_test_combis[name_combi] = {
+        "train" : data_train,
+        "test" : data_test
+    }
+    
 
-    print(list_of_train_test_combis)
-
-
+print("SALUT SALUT")
+print(dico_of_train_test_combis)
 
 
 
