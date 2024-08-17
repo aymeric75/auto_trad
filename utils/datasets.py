@@ -175,53 +175,54 @@ def from_criteria_return_list_of_train_test(dico_trains, dico_tests):
 
 
 
+def all_train_and_test_data():
 
-# useful data
-dico_trains = return_dico_from_criteria(os.getcwd()+"/data/no_labels","100224", "100324", "0800", "1200", "runeusdtp", "5m")
+    # useful data
+    dico_trains = return_dico_from_criteria("/workspace/auto_trad"+"/data/no_labels","100224", "100324", "0800", "1200", "runeusdtp", "5m")
 
-dico_tests = return_dico_from_criteria(os.getcwd()+"/data/with_labels","100224", "100324", "0800", "1200", "runeusdtp", "5m")
+    dico_tests = return_dico_from_criteria("/workspace/auto_trad"+"/data/with_labels","100224", "100324", "0800", "1200", "runeusdtp", "5m")
 
-# 1) return 2 lists: one of the train files, one of the <=> test files
-files_combi_trains, files_combi_tests = from_criteria_return_list_of_train_test(dico_trains, dico_tests)
+    # 1) return 2 lists: one of the train files, one of the <=> test files
+    files_combi_trains, files_combi_tests = from_criteria_return_list_of_train_test(dico_trains, dico_tests)
 
 
-dico_of_train_test_combis = {}
+    dico_of_train_test_combis = {}
 
-## 3) for each combination for "style" in files_combi_trains
-for combi in files_combi_trains:
+    ## 3) for each combination for "style" in files_combi_trains
+    for combi in files_combi_trains:
 
-    # making the name for the combi
-    name_combi = ""
-    styles = []
-    for iii in range(len(combi)):
-        styles.append(combi[iii].split("__")[1])
-    name_combi += "__".join(combi[0].split("__")[2:])
-    name_combi = "__".join(styles) + "__" + name_combi
+        # making the name for the combi
+        name_combi = ""
+        styles = []
+        for iii in range(len(combi)):
+            styles.append(combi[iii].split("__")[1])
+        name_combi += "__".join(combi[0].split("__")[2:])
+        name_combi = "__".join(styles) + "__" + name_combi
 
-    all_corres_tests = True
-    for iii in range(len(combi)):
-        if "with__"+combi[iii][4:] not in list(dico_tests.keys()):
-            all_corres_tests = False
+        all_corres_tests = True
+        for iii in range(len(combi)):
+            if "with__"+combi[iii][4:] not in list(dico_tests.keys()):
+                all_corres_tests = False
 
-    train_files = []
-    test_files = []
+        train_files = []
+        test_files = []
 
-    # all_corres_tests
-    for iii in range(len(combi)):
-        # TYPE iii of the combi
-        train_files.append(dico_trains[combi[iii]])
-        test_files.append(dico_tests["with__"+combi[iii][4:]])
+        # all_corres_tests
+        for iii in range(len(combi)):
+            # TYPE iii of the combi
+            train_files.append(dico_trains[combi[iii]])
+            test_files.append(dico_tests["with__"+combi[iii][4:]])
 
-    data_train = from_list_of_datas_and_names_return_in_good_format(train_files)
-    data_test = from_list_of_datas_and_names_return_in_good_format(test_files)
+        data_train = from_list_of_datas_and_names_return_in_good_format(train_files)
+        data_test = from_list_of_datas_and_names_return_in_good_format(test_files)
 
-    dico_of_train_test_combis[name_combi] = {
-        "train" : data_train,
-        "test" : data_test
-    }
-    
+        dico_of_train_test_combis[name_combi] = {
+            "train" : data_train,
+            "test" : data_test
+        }
+        
 
-print(dico_of_train_test_combis)
+    return dico_of_train_test_combis
 
 
 

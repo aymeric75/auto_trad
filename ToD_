@@ -1,5 +1,15 @@
-immediate: faire une fonction dans datasets.py qu'on importe ensuite dans timeVAE/src/vae_search.py
+immediate: 
 
+    spot quoi peut / doit être utilisé comme metric pour s'assurer de la qualité 
+    d'un training (dans la vae_search)
 
+    s'assurer que ce truc doit être stocké quelque part (en gros, tu devras:
+                sauver le t-sne plot quelque part + stocker la valeur de la métrique)
+
+    faire les dernieres vérif pour que le vae_search (et l'ensembler de la search)
+    soit all set
+
+    (prochaine étape sera de récup les données depuis trading view puis de lancer
+    la search )
 
 general: fcts that from .txt files, do the combinations of datas

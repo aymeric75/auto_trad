@@ -5,6 +5,10 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow import keras
 from tensorflow.keras import layers
 import keras_tuner as kt
+import sys
+sys.path.append('/workspace/auto_trad/utils')
+from datasets import all_train_and_test_data
+sys.path.remove('/workspace/auto_trad/utils')
 
 
 
@@ -59,13 +63,13 @@ class MyHyperModel(kt.HyperModel):
             **kwargs,
         )
 
-def run_vae_pipeline(dataset_name: str, vae_type: str):
+def run_vae_pipeline(dataset_name, data_train, test_array, vae_type: str):
 
 
 
-
-
-    data_with = load_data(data_dir="/workspace/hyperparam-pine/", dataset=dataset_name)
+    # data_with is the test data
+    #data_with = load_data(data_dir="/workspace/hyperparam-pine/", dataset=dataset_name)
+    data_with = test_array
     print(data_with.shape)
 
 
@@ -73,13 +77,16 @@ def run_vae_pipeline(dataset_name: str, vae_type: str):
     # Load data, perform train/valid split, scale data
 
     # read data
-    data = load_data(data_dir=paths.DATASETS_DIR, dataset=dataset_name)
+    #data = load_data(data_dir=paths.DATASETS_DIR, dataset=dataset_name)
+
+    data = data_train
 
     # split data into train/valid splits
     train_data, valid_data = split_data(data, valid_perc=0.1, shuffle=True)
 
     # scale data
     scaled_train_data, scaled_valid_data, scaler = scale_data(train_data, valid_data)
+    
 
     # ----------------------------------------------------------------------------------
     # Instantiate and train the VAE Model
@@ -97,14 +104,12 @@ def run_vae_pipeline(dataset_name: str, vae_type: str):
         **hyperparameters,
     )
 
-    # vae_model.summary()
-    # exit()
 
     # RandomSearch
     tuner = kt.BayesianOptimization(
         MyHyperModel(vae_model),
         objective=kt.Objective("reconstruction_loss", direction="min"),
-        max_trials=100,
+        max_trials=1, # 100
         beta=3,
         #alpha=1e-1,
         overwrite=True,
@@ -115,10 +120,9 @@ def run_vae_pipeline(dataset_name: str, vae_type: str):
 
 
     # tuner.search(X_train, y_train, epochs=100, validation_data=(X_val, y_val), callbacks=[keras.callbacks.EarlyStopping(patience=3)])
-    tuner.search(scaled_train_data, validation_data=(scaled_valid_data,), epochs=100)
+    tuner.search(scaled_train_data, validation_data=(scaled_valid_data,), epochs=3) # 40 ?
 
-
-    exit()
+    return 
 
     # vae_model.trend_poly=hp.Int('trend_poly', min_value=0, max_value=4, step=1)
     # vae_model.batch_size=hp.Int('batch_size', min_value=8, max_value=56, step=8)
@@ -222,4 +226,10 @@ if __name__ == "__main__":
     # models: vae_dense, vae_conv, timeVAE
     model_name = "timeVAE"
 
-    run_vae_pipeline(dataset, model_name)
+    
+
+    dico_of_train_test_combis = all_train_and_test_data()
+
+    for kk, datas in dico_of_train_test_combis.items():
+
+        run_vae_pipeline(kk, datas["train"], datas["test"], model_name)
