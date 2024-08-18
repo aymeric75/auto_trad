@@ -87,7 +87,6 @@ def run_vae_pipeline(dataset_name, data_train, test_array, vae_type: str):
     # scale data
     scaled_train_data, scaled_valid_data, scaler = scale_data(train_data, valid_data)
     
-
     # ----------------------------------------------------------------------------------
     # Instantiate and train the VAE Model
 
@@ -103,7 +102,6 @@ def run_vae_pipeline(dataset_name, data_train, test_array, vae_type: str):
         learning_rate=-1e-2,
         **hyperparameters,
     )
-
 
     # RandomSearch
     tuner = kt.BayesianOptimization(
@@ -122,7 +120,6 @@ def run_vae_pipeline(dataset_name, data_train, test_array, vae_type: str):
     # tuner.search(X_train, y_train, epochs=100, validation_data=(X_val, y_val), callbacks=[keras.callbacks.EarlyStopping(patience=3)])
     tuner.search(scaled_train_data, validation_data=(scaled_valid_data,), epochs=3) # 40 ?
 
-    return 
 
     # vae_model.trend_poly=hp.Int('trend_poly', min_value=0, max_value=4, step=1)
     # vae_model.batch_size=hp.Int('batch_size', min_value=8, max_value=56, step=8)
@@ -138,24 +135,24 @@ def run_vae_pipeline(dataset_name, data_train, test_array, vae_type: str):
     #     verbose=1,
     # )
 
-    # # ----------------------------------------------------------------------------------
-    # # Save scaler and model
-    # model_save_dir = os.path.join(paths.MODELS_DIR, dataset_name)
-    # # save scaler
-    # save_scaler(scaler=scaler, dir_path=model_save_dir)
-    # # Save vae
-    # save_vae_model(vae=vae_model, dir_path=model_save_dir)
+    # # # ----------------------------------------------------------------------------------
+    # # # Save scaler and model
+    # # model_save_dir = os.path.join(paths.MODELS_DIR, dataset_name)
+    # # # save scaler
+    # # save_scaler(scaler=scaler, dir_path=model_save_dir)
+    # # # Save vae
+    # # save_vae_model(vae=vae_model, dir_path=model_save_dir)
 
-    # # ----------------------------------------------------------------------------------
-    # # Visualize posterior samples
-    # x_decoded = get_posterior_samples(vae_model, scaled_train_data)
-    # plot_samples(
-    #     samples1=scaled_train_data,
-    #     samples1_name="Original Train",
-    #     samples2=x_decoded,
-    #     samples2_name="Reconstructed Train",
-    #     num_samples=5,
-    # )
+    # # # ----------------------------------------------------------------------------------
+    # # # Visualize posterior samples
+    # # x_decoded = get_posterior_samples(vae_model, scaled_train_data)
+    # # plot_samples(
+    # #     samples1=scaled_train_data,
+    # #     samples1_name="Original Train",
+    # #     samples2=x_decoded,
+    # #     samples2_name="Reconstructed Train",
+    # #     num_samples=5,
+    # # )
     # # ----------------------------------------------------------------------------------
     # # Generate prior samples, visualize and save them
 
@@ -182,9 +179,9 @@ def run_vae_pipeline(dataset_name, data_train, test_array, vae_type: str):
     #     samples2=prior_samples,
     #     samples2_name="Generated (Prior)",
     #     samples3=data_with_0_normed,
-    #     samples3_name="Sample3",
+    #     samples3_name="Failed trades",
     #     samples4=data_with_1_normed,
-    #     samples4_name="Sample4",
+    #     samples4_name="Success trades",
     #     scenario_name=f"Model-{vae_type} Dataset-{dataset_name}",
     #     save_dir=os.path.join(paths.TSNE_DIR, dataset_name),
     #     max_samples=2000,
@@ -230,6 +227,13 @@ if __name__ == "__main__":
 
     dico_of_train_test_combis = all_train_and_test_data()
 
+    counter = 0
+
     for kk, datas in dico_of_train_test_combis.items():
 
         run_vae_pipeline(kk, datas["train"], datas["test"], model_name)
+
+        if counter == 1:
+            exit()
+
+        counter += 1
